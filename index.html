@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1504.83">
+  <style type="text/css">
+    p.p4 {margin: 0.0px 0.0px 10.0px 0.0px; line-height: 20.0px; font: 14.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333}
+    p.p5 {margin: 0.0px 0.0px 10.0px 0.0px; line-height: 20.0px; font: 14.0px 'Helvetica Neue'; color: #337ab7; -webkit-text-stroke: #337ab7}
+    p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #f5f5f5}
+    p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #ffffff}
+    p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 18.0px; font: 13.0px Courier; color: #333333; -webkit-text-stroke: #333333; background-color: #f5f5f5; min-height: 16.0px}
+    li.li8 {margin: 0.0px 0.0px 0.0px 0.0px; line-height: 20.0px; font: 14.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333}
+    span.s1 {font-kerning: none}
+    span.s2 {font: 14.0px 'Helvetica Neue'; font-kerning: none; color: #337ab7; -webkit-text-stroke: 0px #337ab7}
+    span.s3 {font-kerning: none; color: #333333; -webkit-text-stroke: 0px #333333}
+    span.s4 {font-kerning: none; color: #337ab7; -webkit-text-stroke: 0px #337ab7}
+    span.s5 {-webkit-text-stroke: 0px #000000}
+    ul.ul1 {list-style-type: disc}
+  </style>
+</head>
+<body>
+<h1 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 41.0px; font: 38.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Untitled</span></h1>
+<h4 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 19.0px; font: 18.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1"><i>René Drost</i></span></h4>
+<h4 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 19.0px; font: 18.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1"><i>7/22/2018</i></span></h4>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Introduction</span></h2>
+<p class="p4"><span class="s1">Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, my goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: <a href="http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har"><span class="s2">http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har</span></a> (see the section on the Weight Lifting Exercise Dataset).</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Data exploration and cleaning</span></h2>
+<p class="p5"><span class="s3">The training data can be found at the next location: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"><span class="s4">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</span></a>. The test data can be found at the next location: <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"><span class="s4">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</span></a>.</span></p>
+<p class="p4"><span class="s1">First, we read the training data, and after that we perform some exploration and cleaning.</span></p>
+<p class="p6"><span class="s1">ptd &lt;- read.csv("pml-training.csv", stringsAsFactors = FALSE, na.strings = c("NA", "#DIV/0!"))</span></p>
+<p class="p6"><span class="s1">dim(ptd)</span></p>
+<p class="p7"><span class="s1">## [1] 19622 <span class="Apple-converted-space">  </span>160</span></p>
+<p class="p4"><span class="s1">As we can see there are 19622 observations, each with 160 variables. If we look at the data we see that many columns are (almost) empty. So let’s find the non-empty columns, so we can leave the empty columns out. An non-empty column consists of more than 90% values.</span></p>
+<p class="p6"><span class="s1">findNonEmpties &lt;- function(data) {</span></p>
+<p class="p6"><span class="s1"><span class="Apple-converted-space">    </span>nonEmptyCols &lt;- rep(1:ncol(data), FALSE)</span></p>
+<p class="p6"><span class="s1"><span class="Apple-converted-space">    </span>for (c in 1:ncol(data)) {</span></p>
+<p class="p6"><span class="s1"><span class="Apple-converted-space">        </span>nonEmptyCols[c] &lt;- (sum(is.na(data[,c]))/nrow(data)) &lt; 0.1</span></p>
+<p class="p6"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p6"><span class="s1"><span class="Apple-converted-space">    </span>return(nonEmptyCols == 1)</span></p>
+<p class="p6"><span class="s1">}</span></p>
+<p class="p6"><span class="s1">data.set &lt;- ptd[, findNonEmpties(ptd)]</span></p>
+<p class="p6"><span class="s1">dim(data.set)</span></p>
+<p class="p7"><span class="s1">## [1] 19622<span class="Apple-converted-space">    </span>60</span></p>
+<p class="p4"><span class="s1">That leaves us with only 60 variables. From this list, we can leave out X (this is only a rownumber), user_name, all the timestamp variables and the two variables new_window and num_window.</span></p>
+<p class="p6"><span class="s1">data.set &lt;- subset(data.set, select = -c(X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window, num_window))</span></p>
+<p class="p6"><span class="s1">str(data.set)</span></p>
+<p class="p7"><span class="s1">## 'data.frame':<span class="Apple-converted-space">    </span>19622 obs. of<span class="Apple-converted-space">  </span>53 variables:</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ roll_belt <span class="Apple-converted-space">          </span>: num<span class="Apple-converted-space">  </span>1.41 1.41 1.42 1.48 1.48 1.45 1.42 1.42 1.43 1.45 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ pitch_belt<span class="Apple-converted-space">          </span>: num<span class="Apple-converted-space">  </span>8.07 8.07 8.07 8.05 8.07 8.06 8.09 8.13 8.16 8.17 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ yaw_belt<span class="Apple-converted-space">            </span>: num<span class="Apple-converted-space">  </span>-94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ total_accel_belt<span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>3 3 3 3 3 3 3 3 3 3 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_belt_x<span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>0 0.02 0 0.02 0.02 0.02 0.02 0.02 0.02 0.03 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_belt_y<span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>0 0 0 0 0.02 0 0 0 0 0 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_belt_z<span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>-0.02 -0.02 -0.02 -0.03 -0.02 -0.02 -0.02 -0.02 -0.02 0 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_belt_x<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>-21 -22 -20 -22 -21 -21 -22 -22 -20 -21 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_belt_y<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>4 4 5 3 2 4 3 4 2 4 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_belt_z<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>22 22 23 21 24 21 21 21 24 22 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_belt_x <span class="Apple-converted-space">      </span>: int<span class="Apple-converted-space">  </span>-3 -7 -2 -6 -6 0 -4 -2 1 -3 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_belt_y <span class="Apple-converted-space">      </span>: int<span class="Apple-converted-space">  </span>599 608 600 604 600 603 599 603 602 609 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_belt_z <span class="Apple-converted-space">      </span>: int<span class="Apple-converted-space">  </span>-313 -311 -305 -310 -302 -312 -311 -313 -312 -308 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ roll_arm<span class="Apple-converted-space">            </span>: num<span class="Apple-converted-space">  </span>-128 -128 -128 -128 -128 -128 -128 -128 -128 -128 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ pitch_arm <span class="Apple-converted-space">          </span>: num<span class="Apple-converted-space">  </span>22.5 22.5 22.5 22.1 22.1 22 21.9 21.8 21.7 21.6 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ yaw_arm <span class="Apple-converted-space">            </span>: num<span class="Apple-converted-space">  </span>-161 -161 -161 -161 -161 -161 -161 -161 -161 -161 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ total_accel_arm <span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>34 34 34 34 34 34 34 34 34 34 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_arm_x <span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>0 0.02 0.02 0.02 0 0.02 0 0.02 0.02 0.02 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_arm_y <span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>0 -0.02 -0.02 -0.03 -0.03 -0.03 -0.03 -0.02 -0.03 -0.03 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_arm_z <span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>-0.02 -0.02 -0.02 0.02 0 0 0 0 -0.02 -0.02 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_arm_x <span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>-288 -290 -289 -289 -289 -289 -289 -289 -288 -288 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_arm_y <span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>109 110 110 111 111 111 111 111 109 110 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_arm_z <span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>-123 -125 -126 -123 -123 -122 -125 -124 -122 -124 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_arm_x<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>-368 -369 -368 -372 -374 -369 -373 -372 -369 -376 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_arm_y<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>337 337 344 344 337 342 336 338 341 334 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_arm_z<span class="Apple-converted-space">        </span>: int<span class="Apple-converted-space">  </span>516 513 513 512 506 513 509 510 518 516 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ roll_dumbbell <span class="Apple-converted-space">      </span>: num<span class="Apple-converted-space">  </span>13.1 13.1 12.9 13.4 13.4 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ pitch_dumbbell<span class="Apple-converted-space">      </span>: num<span class="Apple-converted-space">  </span>-70.5 -70.6 -70.3 -70.4 -70.4 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ yaw_dumbbell<span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>-84.9 -84.7 -85.1 -84.9 -84.9 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ total_accel_dumbbell: int<span class="Apple-converted-space">  </span>37 37 37 37 37 37 37 37 37 37 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_dumbbell_x<span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>0 0 0 0 0 0 0 0 0 0 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_dumbbell_y<span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>-0.02 -0.02 -0.02 -0.02 -0.02 -0.02 -0.02 -0.02 -0.02 -0.02 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_dumbbell_z<span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>0 0 0 -0.02 0 0 0 0 0 0 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_dumbbell_x<span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>-234 -233 -232 -232 -233 -234 -232 -234 -232 -235 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_dumbbell_y<span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>47 47 46 48 48 48 47 46 47 48 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_dumbbell_z<span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>-271 -269 -270 -269 -270 -269 -270 -272 -269 -270 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_dumbbell_x <span class="Apple-converted-space">  </span>: int<span class="Apple-converted-space">  </span>-559 -555 -561 -552 -554 -558 -551 -555 -549 -558 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_dumbbell_y <span class="Apple-converted-space">  </span>: int<span class="Apple-converted-space">  </span>293 296 298 303 292 294 295 300 292 291 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_dumbbell_z <span class="Apple-converted-space">  </span>: num<span class="Apple-converted-space">  </span>-65 -64 -63 -60 -68 -66 -70 -74 -65 -69 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ roll_forearm<span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>28.4 28.3 28.3 28.1 28 27.9 27.9 27.8 27.7 27.7 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ pitch_forearm <span class="Apple-converted-space">      </span>: num<span class="Apple-converted-space">  </span>-63.9 -63.9 -63.9 -63.9 -63.9 -63.9 -63.9 -63.8 -63.8 -63.8 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ yaw_forearm <span class="Apple-converted-space">        </span>: num<span class="Apple-converted-space">  </span>-153 -153 -152 -152 -152 -152 -152 -152 -152 -152 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ total_accel_forearm : int<span class="Apple-converted-space">  </span>36 36 36 36 36 36 36 36 36 36 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_forearm_x <span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>0.03 0.02 0.03 0.02 0.02 0.02 0.02 0.02 0.03 0.02 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_forearm_y <span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>0 0 -0.02 -0.02 0 -0.02 0 -0.02 0 0 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ gyros_forearm_z <span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>-0.02 -0.02 0 0 -0.02 -0.03 -0.02 0 -0.02 -0.02 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_forearm_x <span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>192 192 196 189 189 193 195 193 193 190 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_forearm_y <span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>203 203 204 206 206 203 205 205 204 205 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ accel_forearm_z <span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>-215 -216 -213 -214 -214 -215 -215 -213 -214 -215 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_forearm_x<span class="Apple-converted-space">    </span>: int<span class="Apple-converted-space">  </span>-17 -18 -18 -16 -17 -9 -18 -9 -16 -22 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_forearm_y<span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>654 661 658 658 655 660 659 660 653 656 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ magnet_forearm_z<span class="Apple-converted-space">    </span>: num<span class="Apple-converted-space">  </span>476 473 469 469 473 478 470 474 476 473 ...</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>$ classe<span class="Apple-converted-space">              </span>: chr<span class="Apple-converted-space">  </span>"A" "A" "A" "A" ...</span></p>
+<p class="p4"><span class="s1">To reduce the number of independ variables even more, we take a look at the correlation of the independent variables with a correlation of at least 0.95:</span></p>
+<p class="p6"><span class="s1">cor.df &lt;- as.data.frame(as.table(cor(subset(data.set, select = -c(classe)))))</span></p>
+<p class="p6"><span class="s1">subset(cor.df, abs(Freq) &gt; 0.95 &amp; abs(Freq) &lt; 1.0)</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                  </span>Var1 <span class="Apple-converted-space">            </span>Var2 <span class="Apple-converted-space">      </span>Freq</span></p>
+<p class="p7"><span class="s1">## 4<span class="Apple-converted-space">    </span>total_accel_belt<span class="Apple-converted-space">        </span>roll_belt<span class="Apple-converted-space">  </span>0.9809241</span></p>
+<p class="p7"><span class="s1">## 10 <span class="Apple-converted-space">      </span>accel_belt_z<span class="Apple-converted-space">        </span>roll_belt -0.9920085</span></p>
+<p class="p7"><span class="s1">## 60 <span class="Apple-converted-space">      </span>accel_belt_x <span class="Apple-converted-space">      </span>pitch_belt -0.9657334</span></p>
+<p class="p7"><span class="s1">## 157 <span class="Apple-converted-space">        </span>roll_belt total_accel_belt<span class="Apple-converted-space">  </span>0.9809241</span></p>
+<p class="p7"><span class="s1">## 166<span class="Apple-converted-space">      </span>accel_belt_z total_accel_belt -0.9749317</span></p>
+<p class="p7"><span class="s1">## 366<span class="Apple-converted-space">        </span>pitch_belt <span class="Apple-converted-space">    </span>accel_belt_x -0.9657334</span></p>
+<p class="p7"><span class="s1">## 469 <span class="Apple-converted-space">        </span>roll_belt <span class="Apple-converted-space">    </span>accel_belt_z -0.9920085</span></p>
+<p class="p7"><span class="s1">## 472<span class="Apple-converted-space">  </span>total_accel_belt <span class="Apple-converted-space">    </span>accel_belt_z -0.9749317</span></p>
+<p class="p7"><span class="s1">## 1593 gyros_dumbbell_z gyros_dumbbell_x -0.9789507</span></p>
+<p class="p7"><span class="s1">## 1695 gyros_dumbbell_x gyros_dumbbell_z -0.9789507</span></p>
+<p class="p4"><span class="s1">As we can see, that there a few variables that have a high correlation with each other. That’s why I remove the next variables:</span></p>
+<ul class="ul1">
+  <li class="li8"><span class="s5"></span><span class="s1">gyros_dumbbell_x</span></li>
+  <li class="li8"><span class="s5"></span><span class="s1">pitch_belt</span></li>
+  <li class="li8"><span class="s5"></span><span class="s1">roll_belt</span></li>
+</ul>
+<p class="p6"><span class="s1">data.set &lt;- subset(data.set, select = -c(gyros_dumbbell_x, pitch_belt, roll_belt))</span></p>
+<p class="p6"><span class="s1">dim(data.set)</span></p>
+<p class="p7"><span class="s1">## [1] 19622<span class="Apple-converted-space">    </span>50</span></p>
+<p class="p4"><span class="s1">That leaves us a dataset with ‘only’ 50 independ variables.</span></p>
+<p class="p4"><span class="s1">Finally, we convert the variable ‘classe’ in a factor.</span></p>
+<p class="p6"><span class="s1">data.set$classe &lt;- factor(data.set$classe)</span></p>
+<p class="p6"><span class="s1">table(data.set$classe)</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">    </span>A<span class="Apple-converted-space">    </span>B<span class="Apple-converted-space">    </span>C<span class="Apple-converted-space">    </span>D<span class="Apple-converted-space">    </span>E<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## 5580 3797 3422 3216 3607</span></p>
+<p class="p4"><span class="s1">We can see that classe A is a bit more present than the other classes, but there is no need to correct this. Classe A represents a correct movement, while the other classes (B, C, D, and E) represent an incorrect movement.</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Model selection</span></h2>
+<p class="p4"><span class="s1">The problem is a classic classification problem, because we have to predict a classe (with values A, B, C, D and E) by using the other variables. After looking into several classification models of the Caret packages, I decided to choose to use the random forest model. The main reason was that the accuracy was much better than other models.</span></p>
+<p class="p4"><span class="s1">My first thought was that 50 variables is a bit much, and tried to narrow down the number of variables with principal component analysis (PCA). But it appears that this data is quite complexe, and that PCA couldn’t really narrow down the number of components to get a random forest with a accuracy of at lease 99%.</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Fitting model</span></h2>
+<p class="p4"><span class="s1">Before we can train the model, we split the data into a training and a validation set. So, we can see if our model also works on unseen data and we can compute the out of sample error.</span></p>
+<p class="p6"><span class="s1">inTrain &lt;- createDataPartition(y = data.set$classe, p=0.75, list=FALSE)</span></p>
+<p class="p6"><span class="s1">training &lt;- data.set[ inTrain, ]</span></p>
+<p class="p6"><span class="s1">validation &lt;- data.set[ -inTrain, ]</span></p>
+<p class="p4"><span class="s1">So, the next step is to train the model. Because training a random forest model takes quite some time, we will use parallel processing to reduce the training time. For training the model we use a 10-fold cross validation and repeated this 3 times.</span></p>
+<p class="p6"><span class="s1">set.seed(1971)</span></p>
+<p class="p9"><span class="s1"></span><br></p>
+<p class="p6"><span class="s1"># start parallel processing</span></p>
+<p class="p6"><span class="s1">cluster &lt;- makeCluster(detectCores() - 1) # leave 1 core for OS</span></p>
+<p class="p6"><span class="s1">registerDoParallel(cluster)</span></p>
+<p class="p9"><span class="s1"></span><br></p>
+<p class="p6"><span class="s1">trCont &lt;- trainControl(method="repeatedcv", number=10, repeats=3)</span></p>
+<p class="p6"><span class="s1">fit &lt;- train(classe ~ ., data = training, method = "rf", trControl = trCont)</span></p>
+<p class="p9"><span class="s1"></span><br></p>
+<p class="p6"><span class="s1"># stop parallel processing</span></p>
+<p class="p6"><span class="s1">stopCluster(cluster)</span></p>
+<p class="p6"><span class="s1">registerDoSEQ()</span></p>
+<p class="p9"><span class="s1"></span><br></p>
+<p class="p6"><span class="s1"># print final model</span></p>
+<p class="p6"><span class="s1">fit$finalModel</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## Call:</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>randomForest(x = x, y = y, mtry = param$mtry)<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                </span>Type of random forest: classification</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                      </span>Number of trees: 500</span></p>
+<p class="p7"><span class="s1">## No. of variables tried at each split: 25</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">        </span>OOB estimate of<span class="Apple-converted-space">  </span>error rate: 0.65%</span></p>
+<p class="p7"><span class="s1">## Confusion matrix:</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">      </span>A<span class="Apple-converted-space">    </span>B<span class="Apple-converted-space">    </span>C<span class="Apple-converted-space">    </span>D<span class="Apple-converted-space">    </span>E<span class="Apple-converted-space">  </span>class.error</span></p>
+<p class="p7"><span class="s1">## A 4182<span class="Apple-converted-space">    </span>2<span class="Apple-converted-space">    </span>1<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0 0.0007168459</span></p>
+<p class="p7"><span class="s1">## B <span class="Apple-converted-space">  </span>21 2820<span class="Apple-converted-space">    </span>5<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>2 0.0098314607</span></p>
+<p class="p7"><span class="s1">## C<span class="Apple-converted-space">    </span>0 <span class="Apple-converted-space">  </span>15 2541 <span class="Apple-converted-space">  </span>11<span class="Apple-converted-space">    </span>0 0.0101285547</span></p>
+<p class="p7"><span class="s1">## D<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0 <span class="Apple-converted-space">  </span>25 2383<span class="Apple-converted-space">    </span>4 0.0120232172</span></p>
+<p class="p7"><span class="s1">## E<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>4<span class="Apple-converted-space">    </span>6 2696 0.0036954915</span></p>
+<p class="p6"><span class="s1"># print the accuracy of the model</span></p>
+<p class="p6"><span class="s1">max(fit$results$Accuracy)</span></p>
+<p class="p7"><span class="s1">## [1] 0.9914156</span></p>
+<p class="p4"><span class="s1">We can see that the accuracy is about 99.14%. Let’s check the accuracy on the validation set.</span></p>
+<p class="p6"><span class="s1">pred.valiation &lt;- predict(fit, validation)</span></p>
+<p class="p6"><span class="s1">confusionMatrix(pred.valiation, validation$classe)</span></p>
+<p class="p7"><span class="s1">## Confusion Matrix and Statistics</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">          </span>Reference</span></p>
+<p class="p7"><span class="s1">## Prediction<span class="Apple-converted-space">    </span>A<span class="Apple-converted-space">    </span>B<span class="Apple-converted-space">    </span>C<span class="Apple-converted-space">    </span>D<span class="Apple-converted-space">    </span>E</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">          </span>A 1394<span class="Apple-converted-space">    </span>6<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">          </span>B<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">  </span>941<span class="Apple-converted-space">    </span>3<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">          </span>C<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>2<span class="Apple-converted-space">  </span>850<span class="Apple-converted-space">    </span>4<span class="Apple-converted-space">    </span>2</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">          </span>D<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>2<span class="Apple-converted-space">  </span>798<span class="Apple-converted-space">    </span>5</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">          </span>E<span class="Apple-converted-space">    </span>1<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>0<span class="Apple-converted-space">    </span>2<span class="Apple-converted-space">  </span>894</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## Overall Statistics</span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">                                         </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                </span>Accuracy : 0.9945<span class="Apple-converted-space">         </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                  </span>95% CI : (0.992, 0.9964)</span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">    </span>No Information Rate : 0.2845<span class="Apple-converted-space">         </span></span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">    </span>P-Value [Acc &gt; NIR] : &lt; 2.2e-16 <span class="Apple-converted-space">     </span></span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">                                         </span></span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">                  </span>Kappa : 0.993 <span class="Apple-converted-space">         </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>Mcnemar's Test P-Value : NA<span class="Apple-converted-space">             </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## Statistics by Class:</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">                      </span>Class: A Class: B Class: C Class: D Class: E</span></p>
+<p class="p7"><span class="s1">## Sensitivity<span class="Apple-converted-space">            </span>0.9993 <span class="Apple-converted-space">  </span>0.9916 <span class="Apple-converted-space">  </span>0.9942 <span class="Apple-converted-space">  </span>0.9925 <span class="Apple-converted-space">  </span>0.9922</span></p>
+<p class="p7"><span class="s1">## Specificity<span class="Apple-converted-space">            </span>0.9983 <span class="Apple-converted-space">  </span>0.9992 <span class="Apple-converted-space">  </span>0.9980 <span class="Apple-converted-space">  </span>0.9983 <span class="Apple-converted-space">  </span>0.9993</span></p>
+<p class="p7"><span class="s1">## Pos Pred Value <span class="Apple-converted-space">        </span>0.9957 <span class="Apple-converted-space">  </span>0.9968 <span class="Apple-converted-space">  </span>0.9907 <span class="Apple-converted-space">  </span>0.9913 <span class="Apple-converted-space">  </span>0.9967</span></p>
+<p class="p7"><span class="s1">## Neg Pred Value <span class="Apple-converted-space">        </span>0.9997 <span class="Apple-converted-space">  </span>0.9980 <span class="Apple-converted-space">  </span>0.9988 <span class="Apple-converted-space">  </span>0.9985 <span class="Apple-converted-space">  </span>0.9983</span></p>
+<p class="p7"><span class="s1">## Prevalence <span class="Apple-converted-space">            </span>0.2845 <span class="Apple-converted-space">  </span>0.1935 <span class="Apple-converted-space">  </span>0.1743 <span class="Apple-converted-space">  </span>0.1639 <span class="Apple-converted-space">  </span>0.1837</span></p>
+<p class="p7"><span class="s1">## Detection Rate <span class="Apple-converted-space">        </span>0.2843 <span class="Apple-converted-space">  </span>0.1919 <span class="Apple-converted-space">  </span>0.1733 <span class="Apple-converted-space">  </span>0.1627 <span class="Apple-converted-space">  </span>0.1823</span></p>
+<p class="p7"><span class="s1">## Detection Prevalence <span class="Apple-converted-space">  </span>0.2855 <span class="Apple-converted-space">  </span>0.1925 <span class="Apple-converted-space">  </span>0.1750 <span class="Apple-converted-space">  </span>0.1642 <span class="Apple-converted-space">  </span>0.1829</span></p>
+<p class="p7"><span class="s1">## Balanced Accuracy<span class="Apple-converted-space">      </span>0.9988 <span class="Apple-converted-space">  </span>0.9954 <span class="Apple-converted-space">  </span>0.9961 <span class="Apple-converted-space">  </span>0.9954 <span class="Apple-converted-space">  </span>0.9957</span></p>
+<p class="p6"><span class="s1">1 - confusionMatrix(pred.valiation, validation$classe)$overall["Accuracy"]</span></p>
+<p class="p7"><span class="s1">## <span class="Apple-converted-space">  </span>Accuracy<span class="Apple-converted-space"> </span></span></p>
+<p class="p7"><span class="s1">## 0.00550571</span></p>
+<p class="p4"><span class="s1">So, the out of sample error is about 0.0055%.</span></p>
+<h2 style="margin: 0.0px 0.0px 10.0px 0.0px; line-height: 33.0px; font: 30.0px 'Helvetica Neue'; color: #333333; -webkit-text-stroke: #333333"><span class="s1">Predicting the test cases</span></h2>
+<p class="p4"><span class="s1">As part of this assignment, we have to do a prediction on 20 test cases, which can be found in the pml-test.csv. So let us read the data and run the prediction on these testcases:</span></p>
+<p class="p6"><span class="s1">testdata &lt;- read.csv("pml-testing.csv", stringsAsFactors = FALSE, na.strings = c("NA", "#DIV/0!"))</span></p>
+<p class="p6"><span class="s1">pred.test &lt;- predict(fit, testdata)</span></p>
+<p class="p6"><span class="s1">print(pred.test)</span></p>
+<p class="p7"><span class="s1">##<span class="Apple-converted-space">  </span>[1] B A B A A E D B A A B C B A E E A B B B</span></p>
+<p class="p7"><span class="s1">## Levels: A B C D E</span></p>
+<p class="p4"><span class="s1">After feeding the prediction results into the Course Project Prediction Quiz, it shows that the random forest model could predict 19 of the 20 test cases correctly. So, this is a 95% accuracy. A little bit lower then the 99%, but that can be caused by the number of test cases.</span></p>
+</body>
+</html>

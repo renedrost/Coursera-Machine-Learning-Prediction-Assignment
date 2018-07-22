@@ -1,0 +1,128 @@
+---
+title: "Untitled"
+author: "René Drost"
+date: "7/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(parallel)
+library(doParallel)
+```
+
+## Introduction
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, my goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## Data exploration and cleaning
+The training data can be found at the next location: https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv. The test data can be found at the next location:
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv.
+
+First, we read the training data, and after that we perform some exploration and cleaning.
+```{r}
+ptd <- read.csv("pml-training.csv", stringsAsFactors = FALSE, na.strings = c("NA", "#DIV/0!"))
+dim(ptd)
+```
+As we can see there are 19622 observations, each with 160 variables. If we look at the data we see that many columns are (almost) empty. So let's find the non-empty columns, so we can leave the empty columns out. An non-empty column consists of more than 90% values.
+```{r}
+findNonEmpties <- function(data) {
+    nonEmptyCols <- rep(1:ncol(data), FALSE)
+    for (c in 1:ncol(data)) {
+        nonEmptyCols[c] <- (sum(is.na(data[,c]))/nrow(data)) < 0.1
+    }
+    return(nonEmptyCols == 1)
+}
+data.set <- ptd[, findNonEmpties(ptd)]
+dim(data.set)
+```
+That leaves us with only 60 variables. From this list, we can leave out X (this is only a rownumber), user_name, all the timestamp variables and the two variables new_window and num_window.
+```{r}
+data.set <- subset(data.set, select = -c(X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window, num_window))
+str(data.set)
+```
+To reduce the number of independ variables even more, we take a look at the correlation of the independent variables with a correlation of at least 0.95:
+```{r}
+cor.df <- as.data.frame(as.table(cor(subset(data.set, select = -c(classe)))))
+subset(cor.df, abs(Freq) > 0.95 & abs(Freq) < 1.0)
+```
+As we can see, that there a few variables that have a high correlation with each other. That's why I remove the next variables:
+
+- gyros_dumbbell_x
+- pitch_belt
+- roll_belt
+
+```{r}
+data.set <- subset(data.set, select = -c(gyros_dumbbell_x, pitch_belt, roll_belt))
+dim(data.set)
+```
+That leaves us a dataset with 'only' 50 independ variables.
+
+Finally, we convert the variable 'classe' in a factor.
+
+```{r}
+data.set$classe <- factor(data.set$classe)
+table(data.set$classe)
+```
+
+We can see that classe A is a bit more present than the other classes, but there is no need to correct this. Classe A represents a correct movement, while the other classes (B, C, D, and E) represent an incorrect movement.
+
+## Model selection
+The problem is a classic classification problem, because we have to predict a classe (with values A, B, C, D and E) by using the other variables. After looking into several classification models of the Caret packages, I decided to choose to use the random forest model. The main reason was that the accuracy was much better than other models.
+
+My first thought was that 50 variables is a bit much, and tried to narrow down the number of variables with principal component analysis (PCA). But it appears that this data is quite complexe, and that PCA couldn't really narrow down the number of components to get a random forest with a accuracy of at lease 99%. 
+
+## Fitting model
+Before we can train the model, we split the data into a training and a validation set. So, we can see if our model also works on unseen data and we can compute the out of sample error.
+
+```{r}
+inTrain <- createDataPartition(y = data.set$classe, p=0.75, list=FALSE)
+training <- data.set[ inTrain, ]
+validation <- data.set[ -inTrain, ]
+```
+
+So, the next step is to train the model. Because training a random forest model takes quite some time, we will use parallel processing to reduce the training time. For training the model we use a 10-fold cross validation and repeated this 3 times.
+
+```{r}
+set.seed(1971)
+
+# start parallel processing
+cluster <- makeCluster(detectCores() - 1) # leave 1 core for OS
+registerDoParallel(cluster)
+
+trCont <- trainControl(method="repeatedcv", number=10, repeats=3)
+fit <- train(classe ~ ., data = training, method = "rf", trControl = trCont)
+
+# stop parallel processing
+stopCluster(cluster)
+registerDoSEQ()
+
+# print final model
+fit$finalModel
+
+# print the accuracy of the model
+max(fit$results$Accuracy)
+```
+
+We can see that the accuracy is about 99.14%.
+Let's check the accuracy on the validation set.
+
+```{r}
+pred.valiation <- predict(fit, validation)
+confusionMatrix(pred.valiation, validation$classe)
+1 - confusionMatrix(pred.valiation, validation$classe)$overall["Accuracy"]
+```
+So, the out of sample error is about 0.0055%.
+
+## Predicting the test cases
+As part of this assignment, we have to do a prediction on 20 test cases, which can be found in the pml-test.csv. So let us read the data and run the prediction on these testcases:
+```{r}
+testdata <- read.csv("pml-testing.csv", stringsAsFactors = FALSE, na.strings = c("NA", "#DIV/0!"))
+pred.test <- predict(fit, testdata)
+print(pred.test)
+```
+
+After feeding the prediction results into the Course Project Prediction Quiz, it shows that the random forest model could predict 19 of the 20 test cases correctly. So, this is a 95% accuracy. A little bit lower then the 99%, but that can be caused by the number of test cases.
+

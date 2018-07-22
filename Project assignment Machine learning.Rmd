@@ -1,8 +1,8 @@
 ---
-title: "Untitled"
+title: "Project assignment Machine learning (Coursera - John Hopkins)"
 author: "René Drost"
 date: "7/22/2018"
-output: html_document
+output: html_document 
 ---
 
 ```{r setup, include=FALSE}
